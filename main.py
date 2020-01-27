@@ -1,7 +1,6 @@
 import lyricsgenius
 import os.path
 import re
-import config
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -10,27 +9,37 @@ from sklearn.model_selection import train_test_split
 
 # prompts user for API KEY if automatic setup isn't already configured
 def prompt_API_KEY():
-	try:
+	print("No config.py file found. To setup automatic key, input 'y'. Otherwise, input Genius API key for one time use:")
+	key = input()
+
+	print("Input API_KEY now: ")
+	api_key = input()
+
+	if key == 'y':
+		f = open("config.py", "w")
+		f.write("API_KEY = \"" + api_key + "\"")
+		f.close()
+
+		import config
 		genius = lyricsgenius.Genius(config.API_KEY)
-	except:
-		print("No config.py file found. To setup automatic key, input 'y'. Otherwise, input Genius API key for one time use:")
-		key = input()
-
-		if key == 'y':
-			print("Input API_KEY now: ")
-			api_key = input()
-
-			f = open("config.py", "w")
-			f.write("API_KEY = \"" + api_key + "\"")
-			f.close()
-		else:
-			genius = lyricsgenius.Genius(config.API_KEY)
+	else:
+		genius = lyricsgenius.Genius(api_key)
 
 	genius.remove_section_headers = True
 	return genius
 
+# get API KEY from config file if there
+def get_API_KEY():
+	try:
+		import config
+		genius = lyricsgenius.Genius(config.API_KEY)
+	except:
+		genius = prompt_API_KEY()
+
+	return genius
+
 # Generates song list from list of artists
-def generate_song_list(artists)
+def generate_song_list(genius, artists):
 	# artist = genius.search_artist("DJ Khaled", max_songs=10, sort="popularity")
 	# print(artist.songs)
 	# Add training songs to lyrics list
@@ -62,14 +71,14 @@ def preprocess_lyrics(lyrics):
 	
 	return lyrics
 
-def __main__():
-	genius = prompt_API_KEY()
+def main():
+	genius = get_API_KEY()
 
 	artists = ["Drake", "Playboi Carti", "DJ Khaled", "Justin Bieber", "Usher"]
 	test_artists = ["Lady Gaga", "Queen", "Nav", "Eminem", "Taylor Swift"]
 
-	song_lyrics = generate_song_list(artists)
-	song_lyrics_test = generate_song_list(test_artists)
+	song_lyrics = generate_song_list(genius, artists)
+	song_lyrics_test = generate_song_list(genius, test_artists)
 
 	lyrics_clean = preprocess_lyrics(song_lyrics)
 	lyrics_clean_test = preprocess_lyrics(song_lyrics_test)
@@ -123,3 +132,6 @@ def __main__():
 	    feature_to_coef.items(), 
 	    key=lambda x: x[1])[:5]:
 	    print (best_negative)
+
+if __name__ == '__main__':
+    main()
