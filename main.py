@@ -89,7 +89,7 @@ def __main__():
 	    X, target, train_size = .80
 	)
 
-	#find most optimal c value
+	#find most optimal c value, user determined
 
 	#for c in [0.01, 0.05, 0.25, 0.5, 1]:
 	for c in [0.001, 0.005, 0.01, 0.05, 0.1]:
@@ -112,6 +112,7 @@ def __main__():
 	        cv.get_feature_names(), final_model.coef_[0]
 	    )
 	}
+
 	for best_positive in sorted(
 	    feature_to_coef.items(), 
 	    key=lambda x: x[1], 
