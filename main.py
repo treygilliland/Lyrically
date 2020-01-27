@@ -2,11 +2,30 @@ import lyricsgenius
 import os.path
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import re
+
 from os import path
 from PIL import Image
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
-import matplotlib.pyplot as plt
+# Method to clean and format lyrics
+def preprocess_lyrics(lyrics):
+	REPLACE_NO_SPACE = re.compile("[.;:!\'?,\"()\[\]]")
+	REPLACE_WITH_SPACE = re.compile("(<br\s*/><br\s*/>)|(\-)|(\/)")
+
+	lyrics = [REPLACE_NO_SPACE.sub("", line.lower()) for line in lyrics]
+	lyrics = [REPLACE_WITH_SPACE.sub(" ", line) for line in lyrics]
+	
+	return lyrics
+
+# Save a song in filepath Songs/Artist/Album/Title
+def save_song_lyrics(song):
+	filepath = "Songs/" + song.artist + "/" + song.album + "/"
+
+	if not os.path.exists(filepath):
+		os.makedirs(filepath)
+
+	song.save_lyrics(filename=filepath + song.title)
 
 #Client Access token
 genius = lyricsgenius.Genius("xLRuSen3RJZ2MNt5suRH9mrZsKWwocDzVQTKqbqcKu4BMG1s-PGN4AEyngzI69Eo")
@@ -15,15 +34,11 @@ genius = lyricsgenius.Genius("xLRuSen3RJZ2MNt5suRH9mrZsKWwocDzVQTKqbqcKu4BMG1s-P
 
 genius.remove_section_headers = True
 
+
 song = genius.search_song("Tunnel Vision", "Kodak Black")
 #print(song.lyrics)
 
+print(type(song.lyrics))
 
-#This will save a song in the form Songs/Artist/Album/Title
-def save_song_lyrics_filepath(self, song):
-	filepath = "Songs/" + song.artist + "/" + song.album + "/"
-
-	if not os.path.exists(filepath):
-		os.makedirs(filepath)
-
-	song.save_lyrics(filename=filepath + song.title)
+lyrics_clean = preprocess_lyrics(song.lyrics)
+print(lyrics_clean)
